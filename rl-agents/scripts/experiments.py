@@ -36,6 +36,8 @@ BENCHMARK_FILE = 'benchmark_summary'
 LOGGING_CONFIG = 'configs/logging.json'
 VERBOSE_CONFIG = 'configs/verbose.json'
 
+import torch
+torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 def main():
     start = time.time()
@@ -65,7 +67,8 @@ def evaluate(environment_config, agent_config, options):
     run_directory = None
     if options['--name-from-config']:
         run_directory = "{}_{}_{}".format(Path(agent_config).with_suffix('').name,
-                                  datetime.datetime.now().strftime('%Y%m%d-%H%M%S'),
+                                  #datetime.datetime.now().strftime('%Y%m%d-%H%M%S'),
+                                  datetime.datetime.now().strftime('%m%d-%H%M'),
                                   os.getpid())
     options['--seed'] = int(options['--seed']) if options['--seed'] is not None else None
     evaluation = Evaluation(env,
@@ -150,3 +153,4 @@ def generate_agent_configs(benchmark_config, clean=False):
 
 if __name__ == "__main__":
     main()
+
