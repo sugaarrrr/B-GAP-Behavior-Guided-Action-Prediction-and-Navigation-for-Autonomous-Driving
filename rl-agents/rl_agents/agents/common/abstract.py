@@ -42,6 +42,20 @@ class AbstractAgent(Configurable, ABC):
         :param state: s, the initial state of the agent
         :return: [a0, a1, a2...], a sequence of actions to perform
         """
+        
+        actions = self.act(state)
+        print(f'[TEST] Actions: {actions}')
+        '''
+        actually it doesn't return a sequence, it returns the current timestep's action
+        e.g.
+        [TEST] Actions:
+        [1]
+        [TEST] Actions:
+        [1]
+        [TEST] Actions:
+        [2]
+
+        '''
         return [self.act(state)]
 
     @abstractmethod

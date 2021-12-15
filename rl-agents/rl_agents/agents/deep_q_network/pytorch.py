@@ -46,7 +46,15 @@ class DQNAgent(AbstractDQNAgent):
             next_state = torch.cat(tuple(torch.tensor([batch.next_state], dtype=torch.float))).to(self.device)
             terminal = torch.tensor(batch.terminal, dtype=torch.bool).to(self.device)
             batch = Transition(state, action, reward, next_state, terminal, batch.info)
-
+        
+        print('MASHOK BATCH')
+        logger("Batch"); logger(batch)
+        """
+        NOTE: 
+        * batch is just a (S,A,R,S', terminal) tuple, created with named tuple
+        * Q -> state-action value that we want to maximize
+        * THIS FUNCTION IS ONLY USED FOR RUNNING BATCH EPISODES 
+        """
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken
         state_action_values = self.value_net(batch.state)
@@ -69,7 +77,7 @@ class DQNAgent(AbstractDQNAgent):
         # Compute loss
         loss = self.loss_function(state_action_values, target_state_action_value)
         return loss, target_state_action_value, batch
-
+        
     def get_batch_state_values(self, states):
         values, actions = self.value_net(torch.tensor(states, dtype=torch.float).to(self.device)).max(1)
         return values.data.cpu().numpy(), actions.data.cpu().numpy()

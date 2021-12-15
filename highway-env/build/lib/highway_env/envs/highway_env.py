@@ -15,7 +15,7 @@ class HighwayEnv(AbstractEnv):
         The vehicle is driving on a straight highway with several lanes, and is rewarded for reaching a high velocity,
         staying on the rightmost lanes and avoiding collisions.
     """
-
+    '''
     COLLISION_REWARD = -10
     """ The reward received when colliding with a vehicle."""
     RIGHT_LANE_REWARD = 0.2
@@ -24,6 +24,11 @@ class HighwayEnv(AbstractEnv):
     """ The reward received when driving at full speed, linearly mapped to zero for lower speeds."""
     LANE_CHANGE_REWARD = 0.5
     """ The reward received at each lane change action."""
+    '''
+    COLLISION_REWARD = -10
+    RIGHT_LANE_REWARD = 0.12
+    HIGH_VELOCITY_REWARD = 0.8
+    LANE_CHANGE_REWARD = 0.8
 
     def default_config(self):
         config = super().default_config()

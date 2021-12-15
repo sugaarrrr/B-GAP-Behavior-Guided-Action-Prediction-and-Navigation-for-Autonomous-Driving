@@ -6,7 +6,6 @@ Home-page: https://github.com/eleurent/rl-agents
 Author: Edouard Leurent
 Author-email: eleurent@gmail.com
 License: MIT
-Description: UNKNOWN
 Keywords: reinforcement learning agents
 Platform: UNKNOWN
 Classifier: Development Status :: 3 - Alpha
@@ -14,3 +13,7 @@ Classifier: Intended Audience :: Researchers
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3.5
 Provides-Extra: dev
+License-File: LICENSE
+
+UNKNOWN
+

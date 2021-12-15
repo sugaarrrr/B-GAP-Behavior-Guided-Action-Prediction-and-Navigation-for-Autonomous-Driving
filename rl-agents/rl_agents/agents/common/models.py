@@ -512,5 +512,12 @@ def model_factory(config: dict) -> nn.Module:
         return EgoAttentionNetwork(config)
     elif config["type"] == "GraphConvolutionalNetwork":
         return GraphConvolutionalNetwork(config)
+
+    #=============================================================
+    # NOTE: Below is the self-defined model
+    elif config["type"] == "AC":
+        return 
+
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     else:
         raise ValueError("Unknown model type")

@@ -101,8 +101,10 @@ class Evaluation(object):
     def train(self):
         self.training = True
         if getattr(self.agent, "batched", False):
+            print("running batched episodes")
             self.run_batched_episodes()
         else:
+            print("running episodes")
             self.run_episodes()
         self.close()
 
@@ -158,17 +160,19 @@ class Evaluation(object):
             pass
 
         # Step the environment
+        # NOTE: The action is inside the list e.g. [2],[3], etc. 
         previous_observation, action = self.observation, actions[0]
         self.observation, reward, terminal, info = self.monitor.step(action)
 
         # Record the experience.
         if self.training:
             try:
+                # (S, A, R, S')
                 self.agent.record(previous_observation, action, reward, self.observation, terminal, info)
             except NotImplementedError:
                 pass
 
-        return reward, terminal
+        return reward, terminal  
 
     def run_batched_episodes(self):
         """
@@ -302,11 +306,13 @@ class Evaluation(object):
 
     def after_all_episodes(self, episode, rewards):
         rewards = np.array(rewards)
+        # writing to tensorboard
         gamma = self.agent.config.get("gamma", 1)
         self.writer.add_scalar('episode/length', len(rewards), episode)
         self.writer.add_scalar('episode/total_reward', sum(rewards), episode)
         self.writer.add_scalar('episode/return', sum(r*gamma**t for t, r in enumerate(rewards)), episode)
         self.writer.add_histogram('episode/rewards', rewards, episode)
+        # sum all rewards and show
         logger.info("Episode {} score: {:.1f}".format(episode, sum(rewards)))
 
     def after_some_episodes(self, episode, rewards,

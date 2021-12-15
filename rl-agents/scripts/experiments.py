@@ -41,7 +41,8 @@ torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 def main():
     start = time.time()
-    opts = docopt(__doc__)
+    # store all the flags and parameters in dict
+    opts = docopt(__doc__) 
     if opts['evaluate']:
         for _ in range(int(opts['--repeat'])):
             evaluate(opts['<environment>'], opts['<agent>'], opts)
@@ -81,6 +82,9 @@ def evaluate(environment_config, agent_config, options):
                             display_agent=not options['--no-display'],
                             display_rewards=not options['--no-display'])
     if options['--train']:
+        #print('MASHOK TRAINING')
+        #import inspect
+        #print(os.path.abspath(inspect.getfile(Evaluation)))
         evaluation.train()
     elif options['--test']:
         evaluation.test()

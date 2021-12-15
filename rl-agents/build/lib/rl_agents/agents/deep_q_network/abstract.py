@@ -145,6 +145,8 @@ class AbstractDQNAgent(AbstractStochasticAgent, ABC):
         self.previous_state = state
         values = self.get_state_action_values(state)
         self.exploration_policy.update(values, step_time=False)
+        
+        # return distribution from the exploration policy
         return self.exploration_policy.get_distribution()
 
     def set_time(self, time):

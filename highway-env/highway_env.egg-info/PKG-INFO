@@ -6,7 +6,6 @@ Home-page: https://github.com/eleurent/highway-env
 Author: Edouard Leurent
 Author-email: eleurent@gmail.com
 License: MIT
-Description: UNKNOWN
 Keywords: autonomous highway driving simulation environment reinforcement learning
 Platform: UNKNOWN
 Classifier: Development Status :: 3 - Alpha
@@ -15,3 +14,7 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3.6
 Provides-Extra: dev
 Provides-Extra: deploy
+License-File: LICENSE
+
+UNKNOWN
+
