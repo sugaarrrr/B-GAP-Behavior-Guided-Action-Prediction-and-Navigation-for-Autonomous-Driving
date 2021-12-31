@@ -1,6 +1,0 @@
-{
-    "base_config": "configs/HighwayEnv/agents/OLOPAgent/baseline.json",
-    "upper_bound": {
-        "c": 1
-    }
-}
