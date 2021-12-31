@@ -6,6 +6,39 @@ import numpy as np
 
 EPSILON = 0.001
 
+class LaneChangeUtils(object):
+    """
+    NOTE:
+    A class containing utilities for further lane changing analyses.
+    This class is used for:
+    * Reward shaping: penalize unnatural behavior after certain amount of time
+    
+    """
+    def __init__(self):
+        # timer
+        self.starting_time = None
+        self.finish_time = None
+        
+        # count 
+        self.count = 0
+    
+    def start_timer(self):
+        #self.timer_start = True
+        self.starting_time = timer()
+    
+    def stop_timer(self):
+        self.finish_time = timer()
+
+    def reset_timer(self):
+        self.starting_time = 0
+        self.finish_time = 0
+ 
+    def increase_counter(self):
+        self.count += 1
+
+    def reset_counter(self):
+        self.count = 0
+
 
 def constrain(x, a, b):
     return np.minimum(np.maximum(x, a), b)

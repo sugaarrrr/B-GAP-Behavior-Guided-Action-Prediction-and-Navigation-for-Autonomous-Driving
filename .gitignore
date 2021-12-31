@@ -2,3 +2,4 @@ Makefile
 conda.txt
 renv.txt
 rl-agents/scripts/
+rewards/

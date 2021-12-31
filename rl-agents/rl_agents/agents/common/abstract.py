@@ -44,16 +44,15 @@ class AbstractAgent(Configurable, ABC):
         """
         
         actions = self.act(state)
-        print(f'[TEST] Actions: {actions}')
+        #print(f'[TEST] Actions: {actions}')
+
         '''
+        NOTE:
         actually it doesn't return a sequence, it returns the current timestep's action
         e.g.
-        [TEST] Actions:
-        [1]
-        [TEST] Actions:
-        [1]
-        [TEST] Actions:
-        [2]
+        [TEST] Actions: [1]
+        [TEST] Actions: [1]
+        [TEST] Actions: [2]
 
         '''
         return [self.act(state)]

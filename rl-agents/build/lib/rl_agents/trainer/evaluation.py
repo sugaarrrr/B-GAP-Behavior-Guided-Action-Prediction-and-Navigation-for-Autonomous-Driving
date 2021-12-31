@@ -4,6 +4,7 @@ import logging
 import os
 from multiprocessing.pool import Pool
 from pathlib import Path
+from pickle import NONE
 import numpy as np
 from tensorboardX import SummaryWriter
 
@@ -16,7 +17,60 @@ from rl_agents.configuration import serialize
 from rl_agents.trainer.graphics import RewardViewer
 from rl_agents.trainer.monitor import MonitorV2
 
+import time
+from timeit import default_timer as timer
+import datetime
+
 logger = logging.getLogger(__name__)
+
+
+
+# NOTE: For LaneChangeUtils, refer to highway_env/utils.py
+
+class LaneChangeUtils(object):
+    """
+    NOTE:
+    A class containing utilities for further lane changing analyses, per episode.
+    This class is used for:
+    * Reward shaping: penalize unnatural behavior after certain amount of time
+    
+    """
+    def __init__(self):
+        # timer
+        self.start_time = None
+        self.finish_time = None
+        self.first_move = None
+        self.second_move = None
+
+        # if weird behavior is triggered
+        self.weird = False
+        self.weird_count = 0
+
+        # lane change count 
+        self.count = 0
+
+    
+    def start_timer(self):
+        #self.timer_start = True
+        self.start_time = timer()
+    
+    def stop_timer(self):
+        self.finish_time = timer()
+        self.elapsed_time = self.finish_time - self.start_time
+
+    def reset_timer(self):
+        self.start_time = None
+        self.finish_time = None
+        self.elapsed_time = None
+    
+    def reset_moves(self):
+        #self.weird = False
+        self.first_move = None
+        self.second_move = None
+
+    def reset_counter(self): 
+        self.count = 0
+        self.weird_count = 0
 
 
 class Evaluation(object):
@@ -98,6 +152,21 @@ class Evaluation(object):
             self.reward_viewer = RewardViewer()
         self.observation = None
 
+        """
+        NOTE:
+        Below are the self modified attributes
+        """
+        # store lane change count for further analyses
+        self.lane_change_count = 0
+        self.lc_utils = LaneChangeUtils()
+       
+    def open_file(self):
+        self.file = open(f'rewards/{datetime.datetime.now().strftime("%m%d-%H%M")}.txt','w')
+
+    def close_file(self):
+        if self.file:
+            self.file.close()
+
     def train(self):
         self.training = True
         if getattr(self.agent, "batched", False):
@@ -118,11 +187,22 @@ class Evaluation(object):
             self.agent.eval()
         except AttributeError:
             pass
+
+        #self.open_file()
         self.run_episodes()
+        #self.close_file()
         self.close()
 
     def run_episodes(self):
         for episode in range(self.num_episodes):
+            # reset all values stored in utils
+            self.lc_utils.reset_counter()
+            self.lc_utils.reset_timer()
+            self.lc_utils.reset_moves()
+
+            # start timer (WRONG)
+            #self.lc_utils.start_timer()
+            
             # Run episode
             terminal = False
             self.seed(episode)
@@ -144,12 +224,57 @@ class Evaluation(object):
             self.after_all_episodes(episode, rewards)
             self.after_some_episodes(episode, rewards)
 
+            
+            # NOTE: print out lane change count
+            print(f'[TEST] Total lane change count: {self.lc_utils.count}')
+            #self.file.write(f"{sum(rewards)},{self.lc_utils.count}\n")
+
     def step(self):
         """
             Plan a sequence of actions according to the agent policy, and step the environment accordingly.
         """
         # Query agent for actions sequence
         actions = self.agent.plan(self.observation)
+        action_names = {0: 'LANE CHANGE LEFT',
+                        1: 'IDLE',
+                        2: 'LANE CHANGE RIGHT',
+                        3: 'SPEED UP',
+                        4: 'SLOW DOWN'}
+        print(f'[TEST] Action: {actions[0]} -- {action_names[actions[0]]}')
+        WEIRD_PENALTY = -0.05
+        TIME_THRESHOLD = 2.7
+        self.lc_utils.weird = False # reset weird status every episode
+        
+        # NOTE: Add the lane change count if the action is performing lane change
+        if actions[0] == 0 or actions[0] == 2:
+            self.lc_utils.count += 1
+            #self.lane_change_count += 1
+            # if the timer is not started (the first timer)
+            if self.lc_utils.first_move is None or self.lc_utils.start_time is None:
+                self.lc_utils.start_timer()
+                self.lc_utils.first_move = actions[0] # record first move
+            else:
+                self.lc_utils.stop_timer()
+                self.lc_utils.second_move = actions[0] # record second move
+                # unnatural behavior: if repetitively changing lane within the time threshold 
+                if self.lc_utils.first_move != self.lc_utils.second_move and self.lc_utils.elapsed_time <= TIME_THRESHOLD:
+                    # unnatural lane change behavior detected
+                    self.lc_utils.weird = True
+                    self.lc_utils.weird_count += 1
+                    # reset timer after printing penalty later
+
+                # if not immediately changing lane within the time threshold 
+                elif self.lc_utils.elapsed_time > TIME_THRESHOLD:
+                    # reset move records and set current action as the first move
+                    #print(f'mashok {self.lc_utils.weird}')
+                    self.lc_utils.reset_moves()
+                    self.lc_utils.reset_timer()
+                    # set current action and start the timer again
+                    self.lc_utils.first_move = actions[0]
+                    self.lc_utils.start_timer()
+                
+
+            
         if not actions:
             raise Exception("The agent did not plan any action")
 
@@ -160,9 +285,28 @@ class Evaluation(object):
             pass
 
         # Step the environment
-        # NOTE: The action is inside the list e.g. [2],[3], etc. 
+
+        # NOTE: The action is inside the `actions` list e.g. [2],[3], etc. 
         previous_observation, action = self.observation, actions[0]
         self.observation, reward, terminal, info = self.monitor.step(action)
+        
+        # NOTE: penalize reward if current step is weird
+        
+        if self.lc_utils.weird == True:
+            print('='*60)
+            if self.lc_utils.weird_count == 1 : weird_count = f'{self.lc_utils.weird_count}st'
+            elif self.lc_utils.weird_count == 2 : weird_count = f'{self.lc_utils.weird_count}nd'
+            elif self.lc_utils.weird_count == 3 : weird_count = f'{self.lc_utils.weird_count}rd'
+            else: weird_count = f'{self.lc_utils.weird_count}th'
+            print(f'[INFO] {weird_count} unnatural behavior detected, penalizing reward')
+            print(f'[PENALTY] Time difference after the first lane change: {self.lc_utils.elapsed_time}')
+            print(f'[PENALTY] Original reward: {reward}', end=', ')
+            # penalty times how many unnatural behaviors done
+            reward += WEIRD_PENALTY 
+            print(f'penalized reward:{reward}')
+            self.lc_utils.reset_timer()
+            print('='*60)
+        #'''
 
         # Record the experience.
         if self.training:
@@ -313,7 +457,7 @@ class Evaluation(object):
         self.writer.add_scalar('episode/return', sum(r*gamma**t for t, r in enumerate(rewards)), episode)
         self.writer.add_histogram('episode/rewards', rewards, episode)
         # sum all rewards and show
-        logger.info("Episode {} score: {:.1f}".format(episode, sum(rewards)))
+        logger.info("Episode {} score: {:.1f}\n".format(episode, sum(rewards)))
 
     def after_some_episodes(self, episode, rewards,
                             best_increase=1.1,
@@ -331,7 +475,7 @@ class Evaluation(object):
                     and episode >= best_episode + episodes_window:
                 self.best_agent_stats = (self.filtered_agent_stats, episode)
                 self.save_agent_model("best")
-
+#HOW
     @property
     def default_directory(self):
         return Path(self.OUTPUT_FOLDER) / self.env.unwrapped.__class__.__name__ / self.agent.__class__.__name__

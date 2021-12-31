@@ -96,6 +96,7 @@ class KinematicObservation(ObservationType):
     """
         Observe the kinematics of nearby vehicles.
     """
+    # NOTE: FEATURE MATRIX
     FEATURES = ['presence', 'x', 'y', 'vx', 'vy']
 
     def __init__(self, env,
@@ -148,7 +149,11 @@ class KinematicObservation(ObservationType):
     def observe(self):
         # Add ego-vehicle
         df = pandas.DataFrame.from_records([self.env.vehicle.to_dict()])[self.features]
-        # Add nearby traffic
+        
+        # NOTE: TESTING
+        print(df)
+        
+         # Add nearby traffic
         sort, see_behind = (True, False) if self.order == "sorted" else (False, True)
         close_vehicles = self.env.road.close_vehicles_to(self.env.vehicle,
                                                          self.env.PERCEPTION_DISTANCE,

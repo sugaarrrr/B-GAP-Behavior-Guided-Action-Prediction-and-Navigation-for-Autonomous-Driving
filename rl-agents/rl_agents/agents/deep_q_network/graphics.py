@@ -19,7 +19,6 @@ class DQNGraphics(object):
     def display(cls, agent, surface, sim_surface=None, display_text=True):
         """
             Display the action-values for the current state
-
         :param agent: the DQNAgent to be displayed
         :param surface: the pygame surface on which the agent is displayed
         :param sim_surface: the pygame surface on which the env is rendered

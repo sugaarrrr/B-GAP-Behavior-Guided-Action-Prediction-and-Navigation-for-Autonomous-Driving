@@ -47,8 +47,8 @@ class DQNAgent(AbstractDQNAgent):
             terminal = torch.tensor(batch.terminal, dtype=torch.bool).to(self.device)
             batch = Transition(state, action, reward, next_state, terminal, batch.info)
         
-        print('MASHOK BATCH')
-        logger("Batch"); logger(batch)
+        #print('ENTER BATCH')
+        #logger("Batch"); logger(batch)
         """
         NOTE: 
         * batch is just a (S,A,R,S', terminal) tuple, created with named tuple

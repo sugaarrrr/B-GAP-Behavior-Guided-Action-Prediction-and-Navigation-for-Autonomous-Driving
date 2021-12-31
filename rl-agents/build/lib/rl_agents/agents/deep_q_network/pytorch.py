@@ -47,12 +47,13 @@ class DQNAgent(AbstractDQNAgent):
             terminal = torch.tensor(batch.terminal, dtype=torch.bool).to(self.device)
             batch = Transition(state, action, reward, next_state, terminal, batch.info)
         
-        print('MASHOK BATCH')
-        logger("Batch"); logger(batch)
+        #print('ENTER BATCH')
+        #logger("Batch"); logger(batch)
         """
         NOTE: 
         * batch is just a (S,A,R,S', terminal) tuple, created with named tuple
         * Q -> state-action value that we want to maximize
+        * THIS FUNCTION IS ONLY USED FOR RUNNING BATCH EPISODES 
         """
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken

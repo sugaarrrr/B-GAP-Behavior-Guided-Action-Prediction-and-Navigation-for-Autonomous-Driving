@@ -27,8 +27,9 @@ class HighwayEnv(AbstractEnv):
     '''
     COLLISION_REWARD = -10
     RIGHT_LANE_REWARD = 0.12
-    HIGH_VELOCITY_REWARD = 0.8
+    HIGH_VELOCITY_REWARD = 0.7
     LANE_CHANGE_REWARD = 0.8
+    #WEIRD_LANE_CHANGE_REWARD = -5
 
     def default_config(self):
         config = super().default_config()
@@ -42,10 +43,11 @@ class HighwayEnv(AbstractEnv):
             # aggressive vehicles
             "aggressive_vehicle_type": "highway_env.vehicle.behavior.AggressiveCar",
             "aggressive_vehicle_type2": "highway_env.vehicle.behavior.VeryAggressiveCar",
-            "num_aggressive": 0,
+            "num_aggressive": 4,
             "duration": 40,  # [s]
             "initial_spacing": 1,
-            "collision_reward": self.COLLISION_REWARD
+            "collision_reward": self.COLLISION_REWARD,
+            "perc_aggressive": 0.5
         })
         return config
 
@@ -114,10 +116,30 @@ class HighwayEnv(AbstractEnv):
             + self.config["collision_reward"] * self.vehicle.crashed \
             + self.RIGHT_LANE_REWARD * self.vehicle.target_lane_index[2] / (len(neighbours) - 1) \
             + self.HIGH_VELOCITY_REWARD * self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1)
+        #"""
+        # NOTE: testing
+        #================================================================================
+        print('='*70)
+        print(f'neighbours: {neighbours}')
+        print(f'self.config["collision_reward"] * self.vehicle.crashed : {self.config["collision_reward"]} * {self.vehicle.crashed} = {self.config["collision_reward"] * self.vehicle.crashed }')
+        print(f'self.RIGHT_LANE_REWARD * self.vehicle.target_lane_index[2] / (len(neighbours) - 1) = {self.RIGHT_LANE_REWARD} * {self.vehicle.target_lane_index[2]} / {(len(neighbours) - 1)} = {self.RIGHT_LANE_REWARD * self.vehicle.target_lane_index[2] / (len(neighbours) - 1)}')
+        print(f'self.HIGH_VELOCITY_REWARD * self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1) = {self.HIGH_VELOCITY_REWARD} * {self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1)} = {self.HIGH_VELOCITY_REWARD * self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1)}')
+        print(f'state_reward: {state_reward}')
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #"""
         return utils.remap(action_reward[action] + state_reward,
                            [self.config["collision_reward"], self.HIGH_VELOCITY_REWARD+self.RIGHT_LANE_REWARD],
                            [0, 1])
+        
+    """
+    NOTE:
+    `action_reward`:
+    action_reward = {0: self.LANE_CHANGE_REWARD, 1: 0, 2: self.LANE_CHANGE_REWARD, 3: 0, 4: 0}
 
+    `utils.remap` function:
+    def remap(v, x, y):
+        return y[0] + (v-x[0])*(y[1]-y[0])/(x[1]-x[0])
+    """
     def _is_terminal(self):
         """
             The episode is over if the ego vehicle crashed or the time is out.

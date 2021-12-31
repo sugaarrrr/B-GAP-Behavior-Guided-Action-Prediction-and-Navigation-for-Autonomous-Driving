@@ -44,8 +44,16 @@ def main():
     # store all the flags and parameters in dict
     opts = docopt(__doc__) 
     if opts['evaluate']:
+        """
+        NOTE: 
+        append all the lane change into a list and sum it 
+        """
+        total_lane_changes, total_collision = [], []
+
         for _ in range(int(opts['--repeat'])):
             evaluate(opts['<environment>'], opts['<agent>'], opts)
+            #_, results = evaluate(opts['<environment>'], opts['<agent>'], opts)
+
     elif opts['benchmark']:
         benchmark(opts)
     end = time.time()
@@ -88,6 +96,7 @@ def evaluate(environment_config, agent_config, options):
         evaluation.train()
     elif options['--test']:
         evaluation.test()
+       
     else:
         evaluation.close()
     return os.path.relpath(evaluation.monitor.directory)

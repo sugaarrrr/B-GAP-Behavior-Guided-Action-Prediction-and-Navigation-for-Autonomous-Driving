@@ -204,6 +204,7 @@ class Vehicle(Loggable):
     def front_distance_to(self, other):
         return self.direction.dot(other.position - self.position)
 
+    # NOTE: feature matrix
     def to_dict(self, origin_vehicle=None, observe_intentions=True):
         d = {
             'presence': 1,
