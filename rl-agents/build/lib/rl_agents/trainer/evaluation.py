@@ -158,7 +158,7 @@ class Evaluation(object):
         """
         # store lane change count for further analyses
         self.lane_change_count = 0
-        self.lc_utils = LaneChangeUtils()
+        #self.lc_utils = LaneChangeUtils()
        
     def open_file(self):
         self.file = open(f'rewards/{datetime.datetime.now().strftime("%m%d-%H%M")}.txt','w')
@@ -196,9 +196,9 @@ class Evaluation(object):
     def run_episodes(self):
         for episode in range(self.num_episodes):
             # reset all values stored in utils
-            self.lc_utils.reset_counter()
-            self.lc_utils.reset_timer()
-            self.lc_utils.reset_moves()
+            #self.lc_utils.reset_counter()
+            #self.lc_utils.reset_timer()
+            #self.lc_utils.reset_moves()
 
             # start timer (WRONG)
             #self.lc_utils.start_timer()
@@ -226,7 +226,7 @@ class Evaluation(object):
 
             
             # NOTE: print out lane change count
-            print(f'[TEST] Total lane change count: {self.lc_utils.count}')
+            #print(f'[TEST] Total lane change count: {self.lc_utils.count}')
             #self.file.write(f"{sum(rewards)},{self.lc_utils.count}\n")
 
     def step(self):
@@ -243,8 +243,8 @@ class Evaluation(object):
         print(f'[TEST] Action: {actions[0]} -- {action_names[actions[0]]}')
         WEIRD_PENALTY = -0.05
         TIME_THRESHOLD = 2.7
-        self.lc_utils.weird = False # reset weird status every episode
-        
+        #self.lc_utils.weird = False # reset weird status every episode
+        '''
         # NOTE: Add the lane change count if the action is performing lane change
         if actions[0] == 0 or actions[0] == 2:
             self.lc_utils.count += 1
@@ -272,7 +272,7 @@ class Evaluation(object):
                     # set current action and start the timer again
                     self.lc_utils.first_move = actions[0]
                     self.lc_utils.start_timer()
-                
+        '''
 
             
         if not actions:
@@ -291,7 +291,7 @@ class Evaluation(object):
         self.observation, reward, terminal, info = self.monitor.step(action)
         
         # NOTE: penalize reward if current step is weird
-        
+        '''
         if self.lc_utils.weird == True:
             print('='*60)
             if self.lc_utils.weird_count == 1 : weird_count = f'{self.lc_utils.weird_count}st'

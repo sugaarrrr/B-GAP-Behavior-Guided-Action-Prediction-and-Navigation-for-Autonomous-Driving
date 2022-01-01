@@ -1,5 +1,8 @@
 Makefile
 conda.txt
 renv.txt
-rl-agents/scripts/*
+rl-agents/scripts/
 rewards/
+rl-agents/working_build_dist/
+rl-agents/build/
+rl-agents/dist/
