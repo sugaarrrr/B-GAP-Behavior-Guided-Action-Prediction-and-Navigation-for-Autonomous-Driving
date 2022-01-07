@@ -116,17 +116,6 @@ class HighwayEnv(AbstractEnv):
             + self.config["collision_reward"] * self.vehicle.crashed \
             + self.RIGHT_LANE_REWARD * self.vehicle.target_lane_index[2] / (len(neighbours) - 1) \
             + self.HIGH_VELOCITY_REWARD * self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1)
-        #"""
-        # NOTE: testing
-        #================================================================================
-        print('='*70)
-        print(f'neighbours: {neighbours}')
-        print(f'self.config["collision_reward"] * self.vehicle.crashed : {self.config["collision_reward"]} * {self.vehicle.crashed} = {self.config["collision_reward"] * self.vehicle.crashed }')
-        print(f'self.RIGHT_LANE_REWARD * self.vehicle.target_lane_index[2] / (len(neighbours) - 1) = {self.RIGHT_LANE_REWARD} * {self.vehicle.target_lane_index[2]} / {(len(neighbours) - 1)} = {self.RIGHT_LANE_REWARD * self.vehicle.target_lane_index[2] / (len(neighbours) - 1)}')
-        print(f'self.HIGH_VELOCITY_REWARD * self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1) = {self.HIGH_VELOCITY_REWARD} * {self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1)} = {self.HIGH_VELOCITY_REWARD * self.vehicle.velocity_index / (self.vehicle.SPEED_COUNT - 1)}')
-        print(f'state_reward: {state_reward}')
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        #"""
         return utils.remap(action_reward[action] + state_reward,
                            [self.config["collision_reward"], self.HIGH_VELOCITY_REWARD+self.RIGHT_LANE_REWARD],
                            [0, 1])
