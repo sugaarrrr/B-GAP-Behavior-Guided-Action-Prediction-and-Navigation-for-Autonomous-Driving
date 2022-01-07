@@ -38,7 +38,7 @@ class HighwayEnv(AbstractEnv):
                 "type": "Kinematics"
             },
             "lanes_count": 4,
-            "vehicles_count": 40,
+            "vehicles_count": 5,
             "controlled_vehicles":1,
             # aggressive vehicles
             "aggressive_vehicle_type": "highway_env.vehicle.behavior.AggressiveCar",

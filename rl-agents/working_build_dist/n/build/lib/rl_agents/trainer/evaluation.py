@@ -31,7 +31,9 @@ class LaneChangeUtils(object):
     """
     NOTE:
     A class containing utilities for further lane changing analyses, per episode.
-    This class is used for reward shaping: penalize unnatural behavior after certain amount of time
+    This class is used for:
+    * Reward shaping: penalize unnatural behavior after certain amount of time
+    
     """
     def __init__(self):
         # timer
@@ -224,9 +226,7 @@ class Evaluation(object):
 
             
             # NOTE: print out lane change count
-            #print(f'[TEST] Total lane change count: {self.lc_utils.count}')
-            logger.info(f'Total lane change count: {self.lc_utils.count}')
-            logger.info(f'Total unnatural behavior: {self.lc_utils.weird_count}\n')
+            print(f'[TEST] Total lane change count: {self.lc_utils.count}')
             #self.file.write(f"{sum(rewards)},{self.lc_utils.count}\n")
 
     def step(self):
@@ -241,7 +241,7 @@ class Evaluation(object):
                         3: 'SPEED UP',
                         4: 'SLOW DOWN'}
         print(f'[TEST] Action: {actions[0]} -- {action_names[actions[0]]}')
-        WEIRD_PENALTY = -0.15
+        WEIRD_PENALTY = -0.05
         TIME_THRESHOLD = 2.7
         self.lc_utils.weird = False # reset weird status every episode
         
@@ -298,11 +298,10 @@ class Evaluation(object):
             elif self.lc_utils.weird_count == 2 : weird_count = f'{self.lc_utils.weird_count}nd'
             elif self.lc_utils.weird_count == 3 : weird_count = f'{self.lc_utils.weird_count}rd'
             else: weird_count = f'{self.lc_utils.weird_count}th'
-            #print(f'[INFO] {weird_count} unnatural behavior detected, penalizing reward')
             print(f'[INFO] {weird_count} unnatural behavior detected, penalizing reward')
             print(f'[PENALTY] Time difference after the first lane change: {self.lc_utils.elapsed_time}')
             print(f'[PENALTY] Original reward: {reward}', end=', ')
-            # penalize weird behavior in every step
+            # penalty times how many unnatural behaviors done
             reward += WEIRD_PENALTY 
             print(f'penalized reward:{reward}')
             self.lc_utils.reset_timer()
@@ -458,7 +457,7 @@ class Evaluation(object):
         self.writer.add_scalar('episode/return', sum(r*gamma**t for t, r in enumerate(rewards)), episode)
         self.writer.add_histogram('episode/rewards', rewards, episode)
         # sum all rewards and show
-        logger.info("Episode {} score: {:.1f}".format(episode, sum(rewards)))
+        logger.info("Episode {} score: {:.1f}\n".format(episode, sum(rewards)))
 
     def after_some_episodes(self, episode, rewards,
                             best_increase=1.1,

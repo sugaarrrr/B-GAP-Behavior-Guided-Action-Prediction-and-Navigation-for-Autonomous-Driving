@@ -19,6 +19,7 @@ class DQNGraphics(object):
     def display(cls, agent, surface, sim_surface=None, display_text=True):
         """
             Display the action-values for the current state
+
         :param agent: the DQNAgent to be displayed
         :param surface: the pygame surface on which the agent is displayed
         :param sim_surface: the pygame surface on which the env is rendered
@@ -27,6 +28,7 @@ class DQNGraphics(object):
         import pygame
         action_values = agent.get_state_action_values(agent.previous_state)
         action_distribution = agent.action_distribution(agent.previous_state)
+
         cell_size = (surface.get_width() // len(action_values), surface.get_height())
         pygame.draw.rect(surface, cls.BLACK, (0, 0, surface.get_width(), surface.get_height()), 0)
 
@@ -58,8 +60,6 @@ class DQNGraphics(object):
 
             for head in range(list(cls.v_attention.values())[0].shape[0]):
                 attention_surface = pygame.Surface(sim_surface.get_size(), pygame.SRCALPHA)
-
-                #print(cls.v_attention.items())
                 for vehicle, attention in cls.v_attention.items():
                     if attention[head] < cls.MIN_ATTENTION:
                         continue
@@ -76,8 +76,7 @@ class DQNGraphics(object):
                         pygame.draw.line(attention_surface, color,
                                          sim_surface.vec2pix(agent.env.vehicle.position),
                                          sim_surface.vec2pix(vehicle.position),
-                                         #max(sim_surface.pix(width), 1)
-                                         )
+                                         max(sim_surface.pix(width), 1))
                 sim_surface.blit(attention_surface, (0, 0))
         except ValueError as e:
             print("Unable to display vehicles attention", e)
@@ -90,20 +89,16 @@ class DQNGraphics(object):
         ego, others, mask = agent.value_net.split_input(state_t)
         mask = mask.squeeze()
         v_attention = {}
-        #_dict = vars(agent.env)
-        #for k in _dict.keys(): print(k)
-        # NOTE: change agent.env.observation_type to agent.env.observation_type_type
-        obs_type = agent.env.observation_type
         for v_index in range(state.shape[0]):
             if mask[v_index]:
                 continue
             v_position = {}
             for feature in ["x", "y"]:
-                v_feature = state[v_index, agent.env.observation_type.features.index(feature)]
-                v_feature = remap(v_feature, [-1, 1], agent.env.observation_type.features_range[feature])
+                v_feature = state[v_index, agent.env.observation.features.index(feature)]
+                v_feature = remap(v_feature, [-1, 1], agent.env.observation.features_range[feature])
                 v_position[feature] = v_feature
             v_position = np.array([v_position["x"], v_position["y"]])
-            if not agent.env.observation_type.absolute and v_index > 0:
+            if not agent.env.observation.absolute and v_index > 0:
                 v_position += agent.env.unwrapped.vehicle.position
             vehicle = min(agent.env.road.vehicles, key=lambda v: np.linalg.norm(v.position - v_position))
             v_attention[vehicle] = attention[:, v_index]
